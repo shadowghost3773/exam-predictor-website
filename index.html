@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExamPredict - Question Analysis Tool</title>
+    <title>Real Exam Predictor - Working Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
             --accent: #4895ef;
-            --light: #f8f9fa;
-            --dark: #212529;
             --success: #4cc9f0;
             --danger: #f72585;
             --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
         }
         
         * {
@@ -24,7 +26,7 @@
         }
         
         body {
-            background-color: #f5f7fb;
+            background: #f5f7ff;
             color: var(--dark);
             line-height: 1.6;
         }
@@ -40,7 +42,7 @@
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             padding: 1rem 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
         .header-content {
@@ -54,134 +56,26 @@
             font-weight: 700;
         }
         
-        .logo span {
-            color: var(--success);
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-        }
-        
-        nav ul li {
-            margin-left: 1.5rem;
-        }
-        
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        nav ul li a:hover {
-            color: var(--success);
-        }
-        
-        .hero {
-            background: linear-gradient(rgba(67, 97, 238, 0.8), rgba(63, 55, 201, 0.8)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%234361ee"/><path d="M0 0L100 100M100 0L0 100" stroke="%233f37c9" stroke-width="2"/></svg>');
-            background-size: cover;
-            color: white;
-            text-align: center;
-            padding: 4rem 0;
-            border-radius: 0 0 20px 20px;
-            margin-bottom: 2rem;
-        }
-        
-        .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .hero p {
-            font-size: 1.2rem;
-            max-width: 700px;
-            margin: 0 auto 2rem;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: var(--success);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn:hover {
-            background-color: #3aa8d8;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .btn-primary {
-            background-color: var(--primary);
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--secondary);
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-        
-        .feature-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-        }
-        
-        .feature-icon {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-        
-        .feature-card h3 {
-            margin-bottom: 1rem;
-            color: var(--secondary);
-        }
-        
         .upload-section {
-            background-color: white;
-            border-radius: 10px;
+            background: white;
+            border-radius: 15px;
             padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            margin: 3rem 0;
+            margin: 2rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
         
         .upload-area {
-            border: 2px dashed var(--accent);
+            border: 3px dashed var(--accent);
             border-radius: 10px;
             padding: 3rem;
             text-align: center;
             margin: 2rem 0;
-            transition: all 0.3s;
             cursor: pointer;
+            transition: all 0.3s;
         }
         
         .upload-area:hover {
-            background-color: rgba(67, 97, 238, 0.05);
-        }
-        
-        .upload-area.active {
-            background-color: rgba(67, 97, 238, 0.1);
-            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.05);
         }
         
         .upload-icon {
@@ -198,11 +92,11 @@
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
-            margin-top: 1rem;
+            margin: 1rem 0;
         }
         
         .file-item {
-            background-color: var(--light);
+            background: var(--light);
             padding: 0.8rem 1.2rem;
             border-radius: 50px;
             display: flex;
@@ -210,386 +104,527 @@
             gap: 0.5rem;
         }
         
-        .file-item .remove {
-            color: var(--danger);
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
             cursor: pointer;
-            margin-left: 0.5rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .analysis-section {
-            background-color: white;
-            border-radius: 10px;
+            background: white;
+            border-radius: 15px;
             padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            margin: 3rem 0;
+            margin: 2rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
             display: none;
         }
         
-        .analysis-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
+        .progress-container {
+            margin: 2rem 0;
         }
         
         .progress-bar {
-            height: 10px;
-            background-color: var(--light);
-            border-radius: 5px;
-            margin: 1rem 0;
+            height: 12px;
+            background: var(--light);
+            border-radius: 10px;
             overflow: hidden;
+            margin: 1rem 0;
         }
         
         .progress {
             height: 100%;
-            background-color: var(--success);
+            background: linear-gradient(90deg, var(--success), var(--primary));
             width: 0%;
-            transition: width 0.5s;
+            transition: width 0.3s;
+            border-radius: 10px;
         }
         
-        .question-list {
-            margin-top: 2rem;
+        .real-results {
+            margin: 2rem 0;
         }
         
         .question-item {
-            background-color: var(--light);
-            border-left: 4px solid var(--primary);
+            background: var(--light);
             padding: 1.5rem;
-            margin-bottom: 1rem;
-            border-radius: 0 8px 8px 0;
-        }
-        
-        .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
         }
         
         .probability {
-            background-color: var(--primary);
+            background: var(--primary);
             color: white;
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
             font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 0.5rem;
         }
         
-        .high {
-            background-color: var(--danger);
+        .analysis-log {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
         }
         
-        .medium {
-            background-color: var(--warning);
+        .log-entry {
+            margin: 0.3rem 0;
+            color: #495057;
         }
         
-        .low {
-            background-color: var(--success);
-        }
-        
-        footer {
-            background-color: var(--dark);
-            color: white;
-            text-align: center;
-            padding: 2rem 0;
-            margin-top: 3rem;
-        }
-        
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            nav ul {
-                margin-top: 1rem;
-                justify-content: center;
-            }
-            
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .upload-area {
-                padding: 2rem 1rem;
-            }
-        }
+        .log-success { color: #28a745; }
+        .log-warning { color: #ffc107; }
+        .log-error { color: #dc3545; }
     </style>
 </head>
 <body>
     <header>
         <div class="container header-content">
-            <div class="logo">Exam<span>Predict</span></div>
-            <nav>
-                <ul>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#upload">Upload</a></li>
-                    <li><a href="#analysis">Analysis</a></li>
-                    <li><a href="#" class="btn">Get Started</a></li>
-                </ul>
-            </nav>
+            <div class="logo">Real Exam Predictor</div>
         </div>
     </header>
 
-    <section class="hero">
-        <div class="container">
-            <h1>Predict Exam Questions with AI</h1>
-            <p>Upload previous question papers and get a list of the most expected questions for your upcoming exams.</p>
-            <a href="#upload" class="btn btn-primary">Start Analyzing</a>
-        </div>
-    </section>
-
-    <section id="features" class="container">
-        <h2 style="text-align: center; margin-bottom: 2rem; color: var(--secondary);">How It Works</h2>
-        <div class="features">
-            <div class="feature-card">
-                <div class="feature-icon">📸</div>
-                <h3>Upload Question Papers</h3>
-                <p>Simply take photos of your previous exam papers and upload them to our platform.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🔍</div>
-                <h3>AI-Powered Analysis</h3>
-                <p>Our advanced algorithms analyze patterns and frequency of questions across multiple papers.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>Get Expected Questions</h3>
-                <p>Receive a curated list of questions most likely to appear in your upcoming exam.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="upload" class="container">
+    <div class="container">
         <div class="upload-section">
-            <h2 style="margin-bottom: 1rem; color: var(--secondary);">Upload Your Question Papers</h2>
-            <p>Upload images of previous exam papers to analyze question patterns.</p>
+            <h2>Upload Real Question Papers</h2>
+            <p>Upload images of previous exams. The system will ACTUALLY analyze them and find patterns.</p>
             
             <div class="upload-area" id="uploadArea">
                 <div class="upload-icon">📁</div>
                 <h3>Drag & Drop or Click to Upload</h3>
-                <p>Supported formats: JPG, PNG, PDF (max 10MB each)</p>
-                <input type="file" class="file-input" id="fileInput" accept="image/*,.pdf" multiple>
+                <p>Supported: JPG, PNG images of question papers</p>
+                <input type="file" class="file-input" id="fileInput" accept="image/*" multiple>
             </div>
             
-            <div class="uploaded-files" id="uploadedFiles">
-                <!-- Uploaded files will appear here -->
-            </div>
+            <div class="uploaded-files" id="uploadedFiles"></div>
             
-            <div style="text-align: center; margin-top: 2rem;">
-                <button class="btn btn-primary" id="analyzeBtn">Analyze Papers</button>
+            <div style="text-align: center;">
+                <button class="btn" id="analyzeBtn" disabled>
+                    <span id="btnText">Analyze Papers</span>
+                </button>
             </div>
         </div>
-    </section>
 
-    <section id="analysis" class="container">
         <div class="analysis-section" id="analysisSection">
-            <div class="analysis-header">
-                <h2 style="color: var(--secondary);">Expected Questions Analysis</h2>
-                <div class="btn">Export Results</div>
+            <h2>Real Analysis Results</h2>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" id="analysisProgress"></div>
+                </div>
+                <div id="progressText">Ready to analyze...</div>
             </div>
             
-            <p>Based on analysis of <strong id="paperCount">5</strong> previous question papers, here are the most expected questions for your upcoming exam:</p>
-            
-            <div class="progress-bar">
-                <div class="progress" id="analysisProgress"></div>
+            <div class="analysis-log" id="analysisLog">
+                <div class="log-entry">System ready. Upload papers to begin analysis.</div>
             </div>
-            <p style="text-align: center;" id="progressText">Analyzing question patterns...</p>
             
-            <div class="question-list" id="questionList">
-                <!-- Questions will be dynamically added here -->
+            <div class="real-results" id="realResults">
+                <!-- REAL results will appear here -->
             </div>
         </div>
-    </section>
-
-    <footer>
-        <div class="container">
-            <p>&copy; 2023 ExamPredict. All rights reserved.</p>
-            <p>AI-powered exam question prediction for Class 12 students.</p>
-        </div>
-    </footer>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const uploadArea = document.getElementById('uploadArea');
-            const fileInput = document.getElementById('fileInput');
-            const uploadedFiles = document.getElementById('uploadedFiles');
-            const analyzeBtn = document.getElementById('analyzeBtn');
-            const analysisSection = document.getElementById('analysisSection');
-            const analysisProgress = document.getElementById('analysisProgress');
-            const progressText = document.getElementById('progressText');
-            const questionList = document.getElementById('questionList');
-            const paperCount = document.getElementById('paperCount');
-            
-            let files = [];
-            
-            // Upload area click event
-            uploadArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-            
-            // Drag and drop functionality
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('active');
-            });
-            
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('active');
-            });
-            
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('active');
-                handleFiles(e.dataTransfer.files);
-            });
-            
-            // File input change event
-            fileInput.addEventListener('change', () => {
-                handleFiles(fileInput.files);
-            });
-            
-            // Handle uploaded files
-            function handleFiles(newFiles) {
-                for (let i = 0; i < newFiles.length; i++) {
-                    const file = newFiles[i];
-                    
-                    // Check file type and size
-                    if (!file.type.match('image.*') && file.type !== 'application/pdf') {
-                        alert('Please upload only images or PDF files.');
-                        continue;
-                    }
-                    
-                    if (file.size > 10 * 1024 * 1024) {
-                        alert('File size should be less than 10MB.');
-                        continue;
-                    }
-                    
-                    files.push(file);
-                    
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item';
-                    fileItem.innerHTML = `
-                        <span>📄</span>
-                        ${file.name}
-                        <span class="remove" data-index="${files.length - 1}">✕</span>
-                    `;
-                    uploadedFiles.appendChild(fileItem);
-                }
-                
-                // Add event listeners to remove buttons
-                document.querySelectorAll('.remove').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const index = parseInt(this.getAttribute('data-index'));
-                        files.splice(index, 1);
-                        uploadedFiles.removeChild(this.parentElement);
-                        
-                        // Update data-index for remaining items
-                        document.querySelectorAll('.remove').forEach((btn, i) => {
-                            btn.setAttribute('data-index', i);
-                        });
-                    });
-                });
+        // REAL WORKING ANALYSIS ENGINE
+        class RealExamAnalyzer {
+            constructor() {
+                this.uploadedPapers = [];
+                this.analyzedQuestions = [];
+                this.questionPatterns = {};
+                this.worker = null;
             }
-            
-            // Analyze button click event
-            analyzeBtn.addEventListener('click', function() {
-                if (files.length === 0) {
-                    alert('Please upload at least one question paper.');
-                    return;
-                }
+
+            async processImage(file) {
+                this.addLog(`Processing: ${file.name}`, 'warning');
                 
-                // Show analysis section
-                analysisSection.style.display = 'block';
-                
-                // Update paper count
-                paperCount.textContent = files.length;
-                
-                // Simulate analysis progress
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 5;
-                    analysisProgress.style.width = `${progress}%`;
+                try {
+                    // Initialize Tesseract worker
+                    if (!this.worker) {
+                        this.worker = await Tesseract.createWorker('eng');
+                    }
                     
-                    if (progress === 25) {
-                        progressText.textContent = 'Extracting text from images...';
-                    } else if (progress === 50) {
-                        progressText.textContent = 'Identifying question patterns...';
-                    } else if (progress === 75) {
-                        progressText.textContent = 'Calculating probabilities...';
-                    } else if (progress >= 100) {
-                        clearInterval(interval);
-                        progressText.textContent = 'Analysis complete!';
-                        displayExpectedQuestions();
+                    // Perform OCR
+                    const { data: { text } } = await this.worker.recognize(file);
+                    
+                    this.addLog(`Extracted text from ${file.name}`, 'success');
+                    return this.analyzeText(text, file.name);
+                    
+                } catch (error) {
+                    this.addLog(`Error processing ${file.name}: ${error.message}`, 'error');
+                    return [];
+                }
+            }
+
+            analyzeText(text, filename) {
+                const questions = [];
+                const lines = text.split('\n').filter(line => line.trim());
+                
+                // REAL pattern matching for questions
+                lines.forEach((line, index) => {
+                    const trimmed = line.trim();
+                    
+                    // Look for question patterns
+                    if (this.isLikelyQuestion(trimmed)) {
+                        const question = {
+                            text: trimmed,
+                            source: filename,
+                            lineNumber: index + 1,
+                            keywords: this.extractKeywords(trimmed),
+                            type: this.detectQuestionType(trimmed),
+                            marks: this.extractMarks(trimmed)
+                        };
+                        
+                        if (question.text.length > 10) { // Filter out very short lines
+                            questions.push(question);
+                        }
                     }
-                }, 200);
-            });
-            
-            // Display expected questions (sample data)
-            function displayExpectedQuestions() {
-                // Sample questions with probabilities
-                const sampleQuestions = [
-                    { 
-                        text: "Explain the process of photosynthesis with a well-labeled diagram.", 
-                        probability: 85,
-                        level: "high"
-                    },
-                    { 
-                        text: "Solve the differential equation: dy/dx = (x + y + 1)/(x + y - 1)", 
-                        probability: 78,
-                        level: "high"
-                    },
-                    { 
-                        text: "Describe the structure and function of human heart with a neat diagram.", 
-                        probability: 72,
-                        level: "medium"
-                    },
-                    { 
-                        text: "Prove that the sum of first n natural numbers is n(n+1)/2.", 
-                        probability: 65,
-                        level: "medium"
-                    },
-                    { 
-                        text: "Write short notes on the causes and effects of global warming.", 
-                        probability: 60,
-                        level: "medium"
-                    },
-                    { 
-                        text: "Calculate the area bounded by the curves y = x² and y = 2x - x².", 
-                        probability: 55,
-                        level: "low"
-                    },
-                    { 
-                        text: "Explain the process of nitrogen fixation in nature.", 
-                        probability: 50,
-                        level: "low"
-                    }
+                });
+                
+                this.addLog(`Found ${questions.length} potential questions in ${filename}`, 'success');
+                return questions;
+            }
+
+            isLikelyQuestion(text) {
+                // REAL heuristics to identify questions
+                const questionIndicators = [
+                    /^\d+[\.\)]\s/, // Numbered items: "1.", "2)"
+                    /[?]$/, // Ends with question mark
+                    /(explain|describe|define|calculate|prove|solve|state|what|how|why)/i,
+                    /(marks|mark)\s*\d+/i,
+                    /^\s*[A-Z][^a-z]*$/ // All caps (often section headers)
                 ];
                 
-                // Clear previous content
-                questionList.innerHTML = '';
+                return questionIndicators.some(pattern => pattern.test(text));
+            }
+
+            extractKeywords(text) {
+                // Simple keyword extraction
+                const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by']);
+                const words = text.toLowerCase()
+                    .replace(/[^\w\s]/g, '')
+                    .split(/\s+/)
+                    .filter(word => word.length > 3 && !stopWords.has(word));
                 
-                // Add questions to the list
-                sampleQuestions.forEach(question => {
-                    const questionItem = document.createElement('div');
-                    questionItem.className = 'question-item';
+                return [...new Set(words)]; // Remove duplicates
+            }
+
+            detectQuestionType(text) {
+                if (text.includes('?') || /(what|how|why|when|where)/i.test(text)) {
+                    return 'Descriptive';
+                }
+                if (/(calculate|solve|find|prove)/i.test(text)) {
+                    return 'Numerical';
+                }
+                if (/(explain|describe|define)/i.test(text)) {
+                    return 'Explanatory';
+                }
+                if (/(state|list|name)/i.test(text)) {
+                    return 'Short Answer';
+                }
+                return 'Unknown';
+            }
+
+            extractMarks(text) {
+                const markMatch = text.match(/(\d+)\s*marks?/i);
+                return markMatch ? parseInt(markMatch[1]) : null;
+            }
+
+            analyzePatterns(allQuestions) {
+                this.addLog('Analyzing question patterns across all papers...', 'warning');
+                
+                const frequencyMap = {};
+                const keywordFrequency = {};
+                
+                // Count question frequencies
+                allQuestions.forEach(q => {
+                    const key = q.text.substring(0, 100).toLowerCase(); // Use first 100 chars as key
+                    frequencyMap[key] = (frequencyMap[key] || 0) + 1;
                     
-                    const levelClass = question.level === 'high' ? 'high' : 
-                                      question.level === 'medium' ? 'medium' : 'low';
-                    
-                    questionItem.innerHTML = `
-                        <div class="question-header">
-                            <h3>${question.text}</h3>
-                            <span class="probability ${levelClass}">${question.probability}% likely</span>
-                        </div>
-                        <p>This question has appeared in ${Math.floor(question.probability/15)} out of 5 previous papers.</p>
-                    `;
-                    
-                    questionList.appendChild(questionItem);
+                    // Count keyword frequencies
+                    q.keywords.forEach(keyword => {
+                        keywordFrequency[keyword] = (keywordFrequency[keyword] || 0) + 1;
+                    });
                 });
                 
-                // Scroll to analysis section
-                analysisSection.scrollIntoView({ behavior: 'smooth' });
+                // Calculate probabilities
+                const totalPapers = this.uploadedPapers.length;
+                const predictions = [];
+                
+                Object.entries(frequencyMap).forEach(([questionText, frequency]) => {
+                    const probability = Math.min(95, (frequency / totalPapers) * 100);
+                    const originalQuestion = allQuestions.find(q => 
+                        q.text.toLowerCase().includes(questionText.substring(0, 50))
+                    );
+                    
+                    if (originalQuestion && probability >= 20) {
+                        predictions.push({
+                            text: originalQuestion.text,
+                            probability: Math.round(probability),
+                            frequency: frequency,
+                            type: originalQuestion.type,
+                            marks: originalQuestion.marks,
+                            sources: allQuestions.filter(q => 
+                                q.text.toLowerCase().includes(questionText.substring(0, 50))
+                            ).map(q => q.source)
+                        });
+                    }
+                });
+                
+                // Sort by probability
+                predictions.sort((a, b) => b.probability - a.probability);
+                
+                this.addLog(`Generated ${predictions.length} predictions based on actual patterns`, 'success');
+                return predictions;
             }
+
+            addLog(message, type = '') {
+                const log = document.getElementById('analysisLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${type ? 'log-' + type : ''}`;
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+            }
+
+            async cleanup() {
+                if (this.worker) {
+                    await this.worker.terminate();
+                    this.worker = null;
+                }
+            }
+        }
+
+        // Initialize the real analyzer
+        const analyzer = new RealExamAnalyzer();
+
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadedFiles = document.getElementById('uploadedFiles');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const analysisSection = document.getElementById('analysisSection');
+        const analysisProgress = document.getElementById('analysisProgress');
+        const progressText = document.getElementById('progressText');
+        const realResults = document.getElementById('realResults');
+        const btnText = document.getElementById('btnText');
+
+        let uploadedFilesList = [];
+
+        // Upload functionality
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = 'rgba(67, 97, 238, 0.1)';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '';
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        fileInput.addEventListener('change', () => {
+            handleFiles(fileInput.files);
+        });
+
+        function handleFiles(files) {
+            for (let file of files) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please upload only image files (JPG, PNG)');
+                    continue;
+                }
+                
+                uploadedFilesList.push(file);
+                analyzer.uploadedPapers.push(file);
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    📄 ${file.name}
+                    <span class="remove" onclick="removeFile('${file.name}')">✕</span>
+                `;
+                uploadedFiles.appendChild(fileItem);
+            }
+            
+            // Enable analyze button if we have files
+            analyzeBtn.disabled = uploadedFilesList.length === 0;
+            if (uploadedFilesList.length > 0) {
+                btnText.textContent = `Analyze ${uploadedFilesList.length} Paper${uploadedFilesList.length > 1 ? 's' : ''}`;
+            }
+        }
+
+        function removeFile(filename) {
+            uploadedFilesList = uploadedFilesList.filter(f => f.name !== filename);
+            analyzer.uploadedPapers = analyzer.uploadedPapers.filter(f => f.name !== filename);
+            
+            // Refresh file display
+            uploadedFiles.innerHTML = '';
+            uploadedFilesList.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    📄 ${file.name}
+                    <span class="remove" onclick="removeFile('${file.name}')">✕</span>
+                `;
+                uploadedFiles.appendChild(fileItem);
+            });
+            
+            analyzeBtn.disabled = uploadedFilesList.length === 0;
+            btnText.textContent = `Analyze ${uploadedFilesList.length} Paper${uploadedFilesList.length > 1 ? 's' : ''}`;
+        }
+
+        // Global function for removal
+        window.removeFile = removeFile;
+
+        // Analysis button
+        analyzeBtn.addEventListener('click', async function() {
+            if (uploadedFilesList.length === 0) return;
+            
+            // Show analysis section
+            analysisSection.style.display = 'block';
+            analyzeBtn.disabled = true;
+            btnText.textContent = 'Analyzing...';
+            
+            // Clear previous results
+            realResults.innerHTML = '';
+            document.getElementById('analysisLog').innerHTML = 
+                '<div class="log-entry">Starting real analysis...</div>';
+            
+            try {
+                let allExtractedQuestions = [];
+                let processedCount = 0;
+                
+                // Process each file
+                for (let file of uploadedFilesList) {
+                    analyzer.addLog(`Processing: ${file.name}`, 'warning');
+                    
+                    // Update progress
+                    const progress = ((processedCount / uploadedFilesList.length) * 100).toFixed(0);
+                    analysisProgress.style.width = `${progress}%`;
+                    progressText.textContent = `Processing ${file.name}...`;
+                    
+                    // Real OCR processing
+                    const questions = await analyzer.processImage(file);
+                    allExtractedQuestions = allExtractedQuestions.concat(questions);
+                    processedCount++;
+                }
+                
+                analyzer.addLog(`Total questions extracted: ${allExtractedQuestions.length}`, 'success');
+                
+                // Analyze patterns
+                progressText.textContent = 'Analyzing patterns...';
+                analysisProgress.style.width = '80%';
+                
+                const predictions = analyzer.analyzePatterns(allExtractedQuestions);
+                
+                // Display real results
+                progressText.textContent = 'Generating final predictions...';
+                analysisProgress.style.width = '100%';
+                
+                displayRealResults(predictions);
+                
+                progressText.textContent = `Analysis complete! Processed ${uploadedFilesList.length} papers, found ${allExtractedQuestions.length} questions`;
+                analyzer.addLog('Analysis completed successfully', 'success');
+                
+            } catch (error) {
+                analyzer.addLog(`Analysis failed: ${error.message}`, 'error');
+                progressText.textContent = 'Analysis failed - check console for details';
+            } finally {
+                analyzeBtn.disabled = false;
+                btnText.textContent = `Re-analyze ${uploadedFilesList.length} Paper${uploadedFilesList.length > 1 ? 's' : ''}`;
+                await analyzer.cleanup();
+            }
+        });
+
+        function displayRealResults(predictions) {
+            realResults.innerHTML = '';
+            
+            if (predictions.length === 0) {
+                realResults.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #666;">
+                        <h3>No clear patterns detected</h3>
+                        <p>The system couldn't find repeated questions in your uploaded papers.</p>
+                        <p>Try uploading more papers or papers with clearer question text.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const header = document.createElement('h3');
+            header.textContent = `Predicted Questions (Based on ${uploadedFilesList.length} Papers)`;
+            realResults.appendChild(header);
+            
+            predictions.forEach(prediction => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-item';
+                
+                questionDiv.innerHTML = `
+                    <strong>${prediction.text}</strong>
+                    <div style="margin-top: 0.5rem;">
+                        <span class="probability">${prediction.probability}% likely</span>
+                        <span style="margin-left: 1rem; color: #666;">
+                            Appeared in ${prediction.frequency} paper${prediction.frequency > 1 ? 's' : ''}
+                        </span>
+                        ${prediction.marks ? `<span style="margin-left: 1rem; color: #666;">${prediction.marks} marks</span>` : ''}
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #888;">
+                        Type: ${prediction.type} | 
+                        Sources: ${prediction.sources.join(', ')}
+                    </div>
+                `;
+                
+                realResults.appendChild(questionDiv);
+            });
+            
+            // Add summary
+            const summary = document.createElement('div');
+            summary.style.marginTop = '2rem';
+            summary.style.padding = '1rem';
+            summary.style.background = '#e9ecef';
+            summary.style.borderRadius = '8px';
+            summary.innerHTML = `
+                <strong>Analysis Summary:</strong><br>
+                - Processed ${uploadedFilesList.length} question papers<br>
+                - Found ${predictions.length} predictable question patterns<br>
+                - Most frequent question: ${predictions[0]?.probability}% probability<br>
+                - Based on actual OCR text extraction and pattern matching
+            `;
+            realResults.appendChild(summary);
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            analyzer.cleanup();
         });
     </script>
 </body>
