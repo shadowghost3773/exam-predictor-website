@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExamPredict - Question Analysis Tool</title>
+    <title>ExamPredict AI - Smart Question Prediction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
             --accent: #4895ef;
-            --light: #f8f9fa;
-            --dark: #212529;
             --success: #4cc9f0;
             --danger: #f72585;
             --warning: #f8961e;
+            --info: #560bad;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gradient: linear-gradient(135deg, #4361ee, #3a0ca3);
         }
         
         * {
@@ -24,9 +28,10 @@
         }
         
         body {
-            background-color: #f5f7fb;
+            background: linear-gradient(135deg, #f5f7ff 0%, #eef1f9 100%);
             color: var(--dark);
             line-height: 1.6;
+            min-height: 100vh;
         }
         
         .container {
@@ -37,10 +42,13 @@
         }
         
         header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: var(--gradient);
             color: white;
             padding: 1rem 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         
         .header-content {
@@ -50,11 +58,14 @@
         }
         
         .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-size: 1.8rem;
             font-weight: 700;
         }
         
-        .logo span {
+        .logo i {
             color: var(--success);
         }
         
@@ -72,6 +83,9 @@
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         nav ul li a:hover {
@@ -79,17 +93,34 @@
         }
         
         .hero {
-            background: linear-gradient(rgba(67, 97, 238, 0.8), rgba(63, 55, 201, 0.8)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%234361ee"/><path d="M0 0L100 100M100 0L0 100" stroke="%233f37c9" stroke-width="2"/></svg>');
-            background-size: cover;
+            background: var(--gradient);
             color: white;
             text-align: center;
             padding: 4rem 0;
             border-radius: 0 0 20px 20px;
             margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.1"><polygon points="1000,100 1000,0 0,100"/></svg>');
+            background-size: cover;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
         }
         
         .hero h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             margin-bottom: 1rem;
         }
         
@@ -97,10 +128,13 @@
             font-size: 1.2rem;
             max-width: 700px;
             margin: 0 auto 2rem;
+            opacity: 0.9;
         }
         
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             background-color: var(--success);
             color: white;
             padding: 0.8rem 1.5rem;
@@ -114,7 +148,6 @@
         }
         
         .btn:hover {
-            background-color: #3aa8d8;
             transform: translateY(-3px);
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
@@ -127,6 +160,16 @@
             background-color: var(--secondary);
         }
         
+        .btn-outline {
+            background: transparent;
+            border: 2px solid white;
+        }
+        
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+        }
+        
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -136,20 +179,25 @@
         
         .feature-card {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 2rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
         }
         
         .feature-card:hover {
             transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         }
         
         .feature-icon {
             font-size: 2.5rem;
             color: var(--primary);
             margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .feature-card h3 {
@@ -159,34 +207,40 @@
         
         .upload-section {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 2rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             margin: 3rem 0;
         }
         
-        .upload-area {
+        .upload-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .upload-option {
             border: 2px dashed var(--accent);
             border-radius: 10px;
-            padding: 3rem;
+            padding: 2rem;
             text-align: center;
-            margin: 2rem 0;
             transition: all 0.3s;
             cursor: pointer;
         }
         
-        .upload-area:hover {
+        .upload-option:hover {
             background-color: rgba(67, 97, 238, 0.05);
+            border-color: var(--primary);
         }
         
-        .upload-area.active {
+        .upload-option.active {
             background-color: rgba(67, 97, 238, 0.1);
             border-color: var(--primary);
         }
         
-        .upload-icon {
+        .option-icon {
             font-size: 3rem;
-            color: var(--accent);
             margin-bottom: 1rem;
         }
         
@@ -218,7 +272,7 @@
         
         .analysis-section {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 2rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             margin: 3rem 0;
@@ -232,37 +286,145 @@
             margin-bottom: 2rem;
         }
         
+        .progress-container {
+            margin: 2rem 0;
+        }
+        
         .progress-bar {
-            height: 10px;
+            height: 12px;
             background-color: var(--light);
-            border-radius: 5px;
+            border-radius: 10px;
             margin: 1rem 0;
             overflow: hidden;
         }
         
         .progress {
             height: 100%;
-            background-color: var(--success);
+            background: var(--gradient);
             width: 0%;
             transition: width 0.5s;
+            border-radius: 10px;
         }
         
-        .question-list {
-            margin-top: 2rem;
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-step {
+            font-size: 0.9rem;
+            color: var(--dark);
+            opacity: 0.7;
+        }
+        
+        .progress-step.active {
+            color: var(--primary);
+            opacity: 1;
+            font-weight: 600;
+        }
+        
+        .chapter-analysis {
+            margin: 3rem 0;
+        }
+        
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .chapter-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .strength-meter {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease-in-out;
+        }
+        
+        .high-strength {
+            background: linear-gradient(90deg, #4cc9f0, #4361ee);
+        }
+        
+        .medium-strength {
+            background: linear-gradient(90deg, #f8961e, #f3722c);
+        }
+        
+        .low-strength {
+            background: linear-gradient(90deg, #90be6d, #43aa8b);
+        }
+        
+        .chapter-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .probability-tiers {
+            margin: 3rem 0;
+        }
+        
+        .tier {
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .tier-header {
+            padding: 1rem 1.5rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .high-probability .tier-header {
+            background: linear-gradient(135deg, #f72585, #b5179e);
+        }
+        
+        .medium-probability .tier-header {
+            background: linear-gradient(135deg, #f8961e, #f3722c);
+        }
+        
+        .low-probability .tier-header {
+            background: linear-gradient(135deg, #4cc9f0, #4895ef);
+        }
+        
+        .questions-list {
+            background: white;
+            padding: 1.5rem;
         }
         
         .question-item {
-            background-color: var(--light);
-            border-left: 4px solid var(--primary);
-            padding: 1.5rem;
+            padding: 1rem;
+            border-left: 3px solid var(--primary);
             margin-bottom: 1rem;
+            background: var(--light);
             border-radius: 0 8px 8px 0;
         }
         
         .question-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 0.5rem;
         }
         
@@ -272,6 +434,7 @@
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
             font-size: 0.9rem;
+            white-space: nowrap;
         }
         
         .high {
@@ -286,12 +449,131 @@
             background-color: var(--success);
         }
         
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .study-planner {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin: 3rem 0;
+        }
+        
+        .planner-options {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .planner-option {
+            padding: 0.8rem 1.5rem;
+            background: var(--light);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .planner-option.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .planner-schedule {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .day-plan {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 1rem;
+            border-left: 4px solid var(--success);
+        }
+        
+        .day-plan h4 {
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+        
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .mode-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
         footer {
             background-color: var(--dark);
             color: white;
             text-align: center;
-            padding: 2rem 0;
+            padding: 3rem 0;
             margin-top: 3rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            text-align: left;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: var(--success);
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section ul li a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-section ul li a:hover {
+            color: var(--success);
+        }
+        
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #495057;
+            color: #adb5bd;
         }
         
         @media (max-width: 768px) {
@@ -309,8 +591,16 @@
                 font-size: 2rem;
             }
             
-            .upload-area {
-                padding: 2rem 1rem;
+            .upload-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .planner-options {
+                flex-direction: column;
             }
         }
     </style>
@@ -318,54 +608,102 @@
 <body>
     <header>
         <div class="container header-content">
-            <div class="logo">Exam<span>Predict</span></div>
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>ExamPredict AI</span>
+            </div>
             <nav>
                 <ul>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#upload">Upload</a></li>
-                    <li><a href="#analysis">Analysis</a></li>
-                    <li><a href="#" class="btn">Get Started</a></li>
+                    <li><a href="#features"><i class="fas fa-star"></i> Features</a></li>
+                    <li><a href="#upload"><i class="fas fa-upload"></i> Upload</a></li>
+                    <li><a href="#analysis"><i class="fas fa-chart-bar"></i> Analysis</a></li>
+                    <li><a href="#" class="btn"><i class="fas fa-rocket"></i> Get Started</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
     <section class="hero">
-        <div class="container">
-            <h1>Predict Exam Questions with AI</h1>
-            <p>Upload previous question papers and get a list of the most expected questions for your upcoming exams.</p>
-            <a href="#upload" class="btn btn-primary">Start Analyzing</a>
+        <div class="container hero-content">
+            <h1>AI-Powered Exam Question Prediction</h1>
+            <p>Upload previous question papers and get a detailed analysis of the most expected questions for your upcoming exams with chapter-wise predictions and study plans.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="#upload" class="btn btn-primary"><i class="fas fa-upload"></i> Start Analyzing</a>
+                <a href="#features" class="btn btn-outline"><i class="fas fa-play-circle"></i> How It Works</a>
+            </div>
         </div>
     </section>
 
     <section id="features" class="container">
-        <h2 style="text-align: center; margin-bottom: 2rem; color: var(--secondary);">How It Works</h2>
+        <h2 style="text-align: center; margin-bottom: 2rem; color: var(--secondary);">Advanced Features</h2>
         <div class="features">
             <div class="feature-card">
-                <div class="feature-icon">📸</div>
-                <h3>Upload Question Papers</h3>
-                <p>Simply take photos of your previous exam papers and upload them to our platform.</p>
+                <div class="feature-icon"><i class="fas fa-file-upload"></i></div>
+                <h3>Multi-Format Upload</h3>
+                <p>Upload PDFs, images, or even handwritten question papers. Our advanced OCR extracts text automatically.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔍</div>
-                <h3>AI-Powered Analysis</h3>
-                <p>Our advanced algorithms analyze patterns and frequency of questions across multiple papers.</p>
+                <div class="feature-icon"><i class="fas fa-chart-pie"></i></div>
+                <h3>Chapter-wise Analysis</h3>
+                <p>Get detailed insights into chapter importance, weightage, and probability of appearing in exams.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>Get Expected Questions</h3>
-                <p>Receive a curated list of questions most likely to appear in your upcoming exam.</p>
+                <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                <h3>AI Prediction Engine</h3>
+                <p>Our advanced AI analyzes patterns across years to predict the most probable questions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
+                <h3>Smart Study Planner</h3>
+                <p>Get personalized study plans based on predicted questions and your preparation level.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Trend Analysis</h3>
+                <p>Visualize question patterns, mark distribution, and difficulty trends across years.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
+                <h3>Teacher Mode</h3>
+                <p>Special features for teachers to generate practice papers and analyze class performance.</p>
             </div>
         </div>
     </section>
 
     <section id="upload" class="container">
         <div class="upload-section">
-            <h2 style="margin-bottom: 1rem; color: var(--secondary);">Upload Your Question Papers</h2>
-            <p>Upload images of previous exam papers to analyze question patterns.</p>
+            <h2 style="margin-bottom: 1rem; color: var(--secondary);">Upload Question Papers</h2>
+            <p>Upload images or PDFs of previous exam papers to analyze question patterns.</p>
+            
+            <div class="mode-toggle">
+                <div class="mode-btn active" id="studentMode">
+                    <i class="fas fa-user-graduate"></i> Student Mode
+                </div>
+                <div class="mode-btn" id="teacherMode">
+                    <i class="fas fa-chalkboard-teacher"></i> Teacher Mode
+                </div>
+            </div>
+            
+            <div class="upload-options">
+                <div class="upload-option" data-type="pdf">
+                    <div class="option-icon"><i class="fas fa-file-pdf"></i></div>
+                    <h4>PDF Papers</h4>
+                    <p>Upload scanned PDF question papers</p>
+                </div>
+                <div class="upload-option" data-type="image">
+                    <div class="option-icon"><i class="fas fa-file-image"></i></div>
+                    <h4>Image Scans</h4>
+                    <p>JPG, PNG images of question papers</p>
+                </div>
+                <div class="upload-option" data-type="text">
+                    <div class="option-icon"><i class="fas fa-paste"></i></div>
+                    <h4>Direct Text</h4>
+                    <p>Paste questions directly</p>
+                </div>
+            </div>
             
             <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📁</div>
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                 <h3>Drag & Drop or Click to Upload</h3>
                 <p>Supported formats: JPG, PNG, PDF (max 10MB each)</p>
                 <input type="file" class="file-input" id="fileInput" accept="image/*,.pdf" multiple>
@@ -376,7 +714,7 @@
             </div>
             
             <div style="text-align: center; margin-top: 2rem;">
-                <button class="btn btn-primary" id="analyzeBtn">Analyze Papers</button>
+                <button class="btn btn-primary" id="analyzeBtn"><i class="fas fa-chart-bar"></i> Analyze Papers</button>
             </div>
         </div>
     </section>
@@ -385,31 +723,135 @@
         <div class="analysis-section" id="analysisSection">
             <div class="analysis-header">
                 <h2 style="color: var(--secondary);">Expected Questions Analysis</h2>
-                <div class="btn">Export Results</div>
+                <button class="btn"><i class="fas fa-download"></i> Export Results</button>
             </div>
             
             <p>Based on analysis of <strong id="paperCount">5</strong> previous question papers, here are the most expected questions for your upcoming exam:</p>
             
-            <div class="progress-bar">
-                <div class="progress" id="analysisProgress"></div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" id="analysisProgress"></div>
+                </div>
+                <div class="progress-steps">
+                    <div class="progress-step" id="step1">Uploading</div>
+                    <div class="progress-step" id="step2">Extracting Text</div>
+                    <div class="progress-step" id="step3">Analyzing Patterns</div>
+                    <div class="progress-step" id="step4">Generating Predictions</div>
+                    <div class="progress-step" id="step5">Complete</div>
+                </div>
+                <p style="text-align: center; margin-top: 1rem;" id="progressText">Initializing analysis...</p>
             </div>
-            <p style="text-align: center;" id="progressText">Analyzing question patterns...</p>
             
-            <div class="question-list" id="questionList">
-                <!-- Questions will be dynamically added here -->
+            <div class="chapter-analysis">
+                <h3 style="margin-bottom: 1rem; color: var(--secondary);">Chapter-wise Prediction Strength</h3>
+                <div class="chapter-grid" id="chapterGrid">
+                    <!-- Chapter cards will be dynamically added here -->
+                </div>
+            </div>
+            
+            <div class="probability-tiers">
+                <div class="tier high-probability">
+                    <div class="tier-header">
+                        <h3><i class="fas fa-bullseye"></i> Most Probable Questions (80-95%)</h3>
+                        <span>High Priority</span>
+                    </div>
+                    <div class="questions-list" id="highProbQuestions">
+                        <!-- High probability questions will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tier medium-probability">
+                    <div class="tier-header">
+                        <h3><i class="fas fa-chart-line"></i> High Chance Questions (60-80%)</h3>
+                        <span>Medium Priority</span>
+                    </div>
+                    <div class="questions-list" id="mediumProbQuestions">
+                        <!-- Medium probability questions will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tier low-probability">
+                    <div class="tier-header">
+                        <h3><i class="fas fa-chart-bar"></i> Possible Questions (30-60%)</h3>
+                        <span>Low Priority</span>
+                    </div>
+                    <div class="questions-list" id="lowProbQuestions">
+                        <!-- Low probability questions will be added here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="charts-section">
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem; color: var(--secondary);">Chapter Weightage Distribution</h3>
+                    <canvas id="weightageChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem; color: var(--secondary);">Question Type Analysis</h3>
+                    <canvas id="questionTypeChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="study-planner">
+                <h2 style="color: var(--secondary); margin-bottom: 1rem;">Smart Study Planner</h2>
+                <p>Based on the predicted questions, here's a personalized study plan:</p>
+                
+                <div class="planner-options">
+                    <div class="planner-option active" data-days="7">7-Day Plan</div>
+                    <div class="planner-option" data-days="15">15-Day Plan</div>
+                    <div class="planner-option" data-days="30">30-Day Plan</div>
+                </div>
+                
+                <div class="planner-schedule" id="plannerSchedule">
+                    <!-- Study plan will be dynamically added here -->
+                </div>
             </div>
         </div>
     </section>
 
     <footer>
         <div class="container">
-            <p>&copy; 2023 ExamPredict. All rights reserved.</p>
-            <p>AI-powered exam question prediction for Class 12 students.</p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ExamPredict AI</h3>
+                    <p>AI-powered exam question prediction system for students and teachers. Analyze patterns, predict questions, and plan your studies effectively.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#upload">Upload Papers</a></li>
+                        <li><a href="#analysis">Analysis</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Support</a></li>
+                        <li><a href="#">API</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li><a href="mailto:support@exampredict.com">support@exampredict.com</a></li>
+                        <li><a href="#">Feedback</a></li>
+                        <li><a href="#">Report Issue</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 ExamPredict AI. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
             const uploadedFiles = document.getElementById('uploadedFiles');
@@ -417,10 +859,135 @@
             const analysisSection = document.getElementById('analysisSection');
             const analysisProgress = document.getElementById('analysisProgress');
             const progressText = document.getElementById('progressText');
-            const questionList = document.getElementById('questionList');
             const paperCount = document.getElementById('paperCount');
+            const chapterGrid = document.getElementById('chapterGrid');
+            const highProbQuestions = document.getElementById('highProbQuestions');
+            const mediumProbQuestions = document.getElementById('mediumProbQuestions');
+            const lowProbQuestions = document.getElementById('lowProbQuestions');
+            const plannerSchedule = document.getElementById('plannerSchedule');
+            const studentMode = document.getElementById('studentMode');
+            const teacherMode = document.getElementById('teacherMode');
+            const progressSteps = document.querySelectorAll('.progress-step');
+            
+            // Sample data
+            const sampleChapters = [
+                { name: "Calculus", strength: 85, marks: "12-15", frequency: "Every year" },
+                { name: "Algebra", strength: 78, marks: "10-12", frequency: "Every year" },
+                { name: "Trigonometry", strength: 72, marks: "8-10", frequency: "2 out of 3 years" },
+                { name: "Probability", strength: 65, marks: "6-8", frequency: "2 out of 3 years" },
+                { name: "Statistics", strength: 60, marks: "5-7", frequency: "1 out of 2 years" },
+                { name: "Vectors", strength: 55, marks: "4-6", frequency: "1 out of 2 years" },
+                { name: "Coordinate Geometry", strength: 50, marks: "4-6", frequency: "1 out of 3 years" },
+                { name: "Sets", strength: 45, marks: "3-5", frequency: "1 out of 3 years" }
+            ];
+            
+            const sampleQuestions = {
+                high: [
+                    { 
+                        text: "Explain the process of photosynthesis with a well-labeled diagram.", 
+                        probability: 92,
+                        type: "Long Answer",
+                        marks: 5,
+                        chapter: "Biology"
+                    },
+                    { 
+                        text: "Solve the differential equation: dy/dx = (x + y + 1)/(x + y - 1)", 
+                        probability: 88,
+                        type: "Long Answer", 
+                        marks: 5,
+                        chapter: "Mathematics"
+                    },
+                    { 
+                        text: "Describe the structure and function of human heart with a neat diagram.", 
+                        probability: 85,
+                        type: "Long Answer",
+                        marks: 5,
+                        chapter: "Biology"
+                    }
+                ],
+                medium: [
+                    { 
+                        text: "Prove that the sum of first n natural numbers is n(n+1)/2.", 
+                        probability: 75,
+                        type: "Short Answer",
+                        marks: 3,
+                        chapter: "Mathematics"
+                    },
+                    { 
+                        text: "Write short notes on the causes and effects of global warming.", 
+                        probability: 70,
+                        type: "Short Answer",
+                        marks: 3,
+                        chapter: "Environmental Science"
+                    },
+                    { 
+                        text: "Explain Ohm's law and its limitations.", 
+                        probability: 65,
+                        type: "Short Answer",
+                        marks: 3,
+                        chapter: "Physics"
+                    }
+                ],
+                low: [
+                    { 
+                        text: "Calculate the area bounded by the curves y = x² and y = 2x - x².", 
+                        probability: 55,
+                        type: "Short Answer",
+                        marks: 3,
+                        chapter: "Mathematics"
+                    },
+                    { 
+                        text: "Explain the process of nitrogen fixation in nature.", 
+                        probability: 50,
+                        type: "Short Answer",
+                        marks: 3,
+                        chapter: "Biology"
+                    },
+                    { 
+                        text: "What are the different types of chemical reactions? Give examples.", 
+                        probability: 45,
+                        type: "Very Short Answer",
+                        marks: 2,
+                        chapter: "Chemistry"
+                    }
+                ]
+            };
+            
+            const studyPlans = {
+                7: [
+                    { day: "Day 1", topics: "Calculus, Algebra" },
+                    { day: "Day 2", topics: "Trigonometry, Probability" },
+                    { day: "Day 3", topics: "Statistics, Vectors" },
+                    { day: "Day 4", topics: "Coordinate Geometry, Sets" },
+                    { day: "Day 5", topics: "Revision - High Probability Topics" },
+                    { day: "Day 6", topics: "Practice - Previous Year Questions" },
+                    { day: "Day 7", topics: "Mock Test & Final Revision" }
+                ],
+                15: [
+                    { day: "Week 1", topics: "Calculus, Algebra, Trigonometry" },
+                    { day: "Week 2", topics: "Probability, Statistics, Vectors" },
+                    { day: "Day 11", topics: "Coordinate Geometry, Sets" },
+                    { day: "Day 12", topics: "Revision - All Chapters" },
+                    { day: "Day 13", topics: "Practice - High Probability Questions" },
+                    { day: "Day 14", topics: "Mock Test - Full Syllabus" },
+                    { day: "Day 15", topics: "Weak Areas Revision" }
+                ],
+                30: [
+                    { day: "Week 1-2", topics: "All Chapters - First Reading" },
+                    { day: "Week 3", topics: "High Probability Chapters Revision" },
+                    { day: "Day 16-20", topics: "Practice - Chapter-wise Questions" },
+                    { day: "Day 21-25", topics: "Previous Year Papers Solving" },
+                    { day: "Day 26-28", topics: "Mock Tests & Performance Analysis" },
+                    { day: "Day 29", topics: "Weak Areas Focus" },
+                    { day: "Day 30", topics: "Final Revision & Formula Recap" }
+                ]
+            };
             
             let files = [];
+            let currentMode = 'student';
+            
+            // Initialize charts
+            let weightageChart, questionTypeChart;
             
             // Upload area click event
             uploadArea.addEventListener('click', () => {
@@ -448,6 +1015,19 @@
                 handleFiles(fileInput.files);
             });
             
+            // Mode toggle
+            studentMode.addEventListener('click', () => {
+                studentMode.classList.add('active');
+                teacherMode.classList.remove('active');
+                currentMode = 'student';
+            });
+            
+            teacherMode.addEventListener('click', () => {
+                teacherMode.classList.add('active');
+                studentMode.classList.remove('active');
+                currentMode = 'teacher';
+            });
+            
             // Handle uploaded files
             function handleFiles(newFiles) {
                 for (let i = 0; i < newFiles.length; i++) {
@@ -469,7 +1049,7 @@
                     const fileItem = document.createElement('div');
                     fileItem.className = 'file-item';
                     fileItem.innerHTML = `
-                        <span>📄</span>
+                        <span>${file.type === 'application/pdf' ? '📄' : '🖼️'}</span>
                         ${file.name}
                         <span class="remove" data-index="${files.length - 1}">✕</span>
                     `;
@@ -505,91 +1085,220 @@
                 paperCount.textContent = files.length;
                 
                 // Simulate analysis progress
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 5;
-                    analysisProgress.style.width = `${progress}%`;
-                    
-                    if (progress === 25) {
-                        progressText.textContent = 'Extracting text from images...';
-                    } else if (progress === 50) {
-                        progressText.textContent = 'Identifying question patterns...';
-                    } else if (progress === 75) {
-                        progressText.textContent = 'Calculating probabilities...';
-                    } else if (progress >= 100) {
-                        clearInterval(interval);
-                        progressText.textContent = 'Analysis complete!';
-                        displayExpectedQuestions();
-                    }
-                }, 200);
+                simulateAnalysis();
             });
             
-            // Display expected questions (sample data)
-            function displayExpectedQuestions() {
-                // Sample questions with probabilities
-                const sampleQuestions = [
-                    { 
-                        text: "Explain the process of photosynthesis with a well-labeled diagram.", 
-                        probability: 85,
-                        level: "high"
-                    },
-                    { 
-                        text: "Solve the differential equation: dy/dx = (x + y + 1)/(x + y - 1)", 
-                        probability: 78,
-                        level: "high"
-                    },
-                    { 
-                        text: "Describe the structure and function of human heart with a neat diagram.", 
-                        probability: 72,
-                        level: "medium"
-                    },
-                    { 
-                        text: "Prove that the sum of first n natural numbers is n(n+1)/2.", 
-                        probability: 65,
-                        level: "medium"
-                    },
-                    { 
-                        text: "Write short notes on the causes and effects of global warming.", 
-                        probability: 60,
-                        level: "medium"
-                    },
-                    { 
-                        text: "Calculate the area bounded by the curves y = x² and y = 2x - x².", 
-                        probability: 55,
-                        level: "low"
-                    },
-                    { 
-                        text: "Explain the process of nitrogen fixation in nature.", 
-                        probability: 50,
-                        level: "low"
+            // Simulate analysis process
+            function simulateAnalysis() {
+                let progress = 0;
+                let currentStep = 0;
+                
+                const interval = setInterval(() => {
+                    progress += 2;
+                    analysisProgress.style.width = `${progress}%`;
+                    
+                    if (progress >= 20 && currentStep < 1) {
+                        progressSteps[currentStep].classList.remove('active');
+                        currentStep = 1;
+                        progressSteps[currentStep].classList.add('active');
+                        progressText.textContent = 'Extracting text from uploaded files...';
+                    } else if (progress >= 40 && currentStep < 2) {
+                        progressSteps[currentStep].classList.remove('active');
+                        currentStep = 2;
+                        progressSteps[currentStep].classList.add('active');
+                        progressText.textContent = 'Analyzing question patterns...';
+                    } else if (progress >= 60 && currentStep < 3) {
+                        progressSteps[currentStep].classList.remove('active');
+                        currentStep = 3;
+                        progressSteps[currentStep].classList.add('active');
+                        progressText.textContent = 'Generating predictions...';
+                    } else if (progress >= 80 && currentStep < 4) {
+                        progressSteps[currentStep].classList.remove('active');
+                        currentStep = 4;
+                        progressSteps[currentStep].classList.add('active');
+                        progressText.textContent = 'Finalizing results...';
+                    } else if (progress >= 100) {
+                        clearInterval(interval);
+                        progressSteps[currentStep].classList.remove('active');
+                        currentStep = 4;
+                        progressSteps[currentStep].classList.add('active');
+                        progressText.textContent = 'Analysis complete!';
+                        
+                        // Display results
+                        displayChapterAnalysis();
+                        displayExpectedQuestions();
+                        initializeCharts();
+                        displayStudyPlan(7);
+                        
+                        // Scroll to analysis section
+                        analysisSection.scrollIntoView({ behavior: 'smooth' });
                     }
-                ];
+                }, 100);
+            }
+            
+            // Display chapter analysis
+            function displayChapterAnalysis() {
+                chapterGrid.innerHTML = '';
                 
-                // Clear previous content
-                questionList.innerHTML = '';
-                
-                // Add questions to the list
-                sampleQuestions.forEach(question => {
-                    const questionItem = document.createElement('div');
-                    questionItem.className = 'question-item';
+                sampleChapters.forEach(chapter => {
+                    const chapterCard = document.createElement('div');
+                    chapterCard.className = 'chapter-card';
                     
-                    const levelClass = question.level === 'high' ? 'high' : 
-                                      question.level === 'medium' ? 'medium' : 'low';
+                    let strengthClass = 'high-strength';
+                    if (chapter.strength < 70) strengthClass = 'medium-strength';
+                    if (chapter.strength < 60) strengthClass = 'low-strength';
                     
-                    questionItem.innerHTML = `
-                        <div class="question-header">
-                            <h3>${question.text}</h3>
-                            <span class="probability ${levelClass}">${question.probability}% likely</span>
+                    chapterCard.innerHTML = `
+                        <h4>${chapter.name}</h4>
+                        <div class="strength-meter">
+                            <div class="strength-fill ${strengthClass}" style="width: ${chapter.strength}%"></div>
                         </div>
-                        <p>This question has appeared in ${Math.floor(question.probability/15)} out of 5 previous papers.</p>
+                        <span class="probability">${chapter.strength}% likely</span>
+                        <div class="chapter-stats">
+                            <span>Expected Marks: ${chapter.marks}</span>
+                            <span>Frequency: ${chapter.frequency}</span>
+                        </div>
                     `;
                     
-                    questionList.appendChild(questionItem);
+                    chapterGrid.appendChild(chapterCard);
+                });
+            }
+            
+            // Display expected questions
+            function displayExpectedQuestions() {
+                highProbQuestions.innerHTML = '';
+                mediumProbQuestions.innerHTML = '';
+                lowProbQuestions.innerHTML = '';
+                
+                // High probability questions
+                sampleQuestions.high.forEach(question => {
+                    const questionItem = document.createElement('div');
+                    questionItem.className = 'question-item';
+                    questionItem.innerHTML = `
+                        <div class="question-header">
+                            <h4>${question.text}</h4>
+                            <span class="probability high">${question.probability}%</span>
+                        </div>
+                        <p><strong>Type:</strong> ${question.type} | <strong>Marks:</strong> ${question.marks} | <strong>Chapter:</strong> ${question.chapter}</p>
+                    `;
+                    highProbQuestions.appendChild(questionItem);
                 });
                 
-                // Scroll to analysis section
-                analysisSection.scrollIntoView({ behavior: 'smooth' });
+                // Medium probability questions
+                sampleQuestions.medium.forEach(question => {
+                    const questionItem = document.createElement('div');
+                    questionItem.className = 'question-item';
+                    questionItem.innerHTML = `
+                        <div class="question-header">
+                            <h4>${question.text}</h4>
+                            <span class="probability medium">${question.probability}%</span>
+                        </div>
+                        <p><strong>Type:</strong> ${question.type} | <strong>Marks:</strong> ${question.marks} | <strong>Chapter:</strong> ${question.chapter}</p>
+                    `;
+                    mediumProbQuestions.appendChild(questionItem);
+                });
+                
+                // Low probability questions
+                sampleQuestions.low.forEach(question => {
+                    const questionItem = document.createElement('div');
+                    questionItem.className = 'question-item';
+                    questionItem.innerHTML = `
+                        <div class="question-header">
+                            <h4>${question.text}</h4>
+                            <span class="probability low">${question.probability}%</span>
+                        </div>
+                        <p><strong>Type:</strong> ${question.type} | <strong>Marks:</strong> ${question.marks} | <strong>Chapter:</strong> ${question.chapter}</p>
+                    `;
+                    lowProbQuestions.appendChild(questionItem);
+                });
             }
+            
+            // Initialize charts
+            function initializeCharts() {
+                // Weightage chart
+                const weightageCtx = document.getElementById('weightageChart').getContext('2d');
+                weightageChart = new Chart(weightageCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Calculus', 'Algebra', 'Trigonometry', 'Probability', 'Statistics', 'Others'],
+                        datasets: [{
+                            data: [25, 20, 15, 12, 10, 18],
+                            backgroundColor: [
+                                '#4361ee', '#3a0ca3', '#4cc9f0', '#f72585', '#7209b7', '#4895ef'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            }
+                        }
+                    }
+                });
+                
+                // Question type chart
+                const questionTypeCtx = document.getElementById('questionTypeChart').getContext('2d');
+                questionTypeChart = new Chart(questionTypeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Long Answer', 'Short Answer', 'Very Short', 'MCQ'],
+                        datasets: [{
+                            label: 'Number of Questions',
+                            data: [5, 8, 10, 15],
+                            backgroundColor: '#4361ee',
+                            borderColor: '#3a0ca3',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Display study plan
+            function displayStudyPlan(days) {
+                plannerSchedule.innerHTML = '';
+                
+                const plan = studyPlans[days];
+                
+                plan.forEach(dayPlan => {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'day-plan';
+                    dayElement.innerHTML = `
+                        <h4>${dayPlan.day}</h4>
+                        <p>${dayPlan.topics}</p>
+                    `;
+                    plannerSchedule.appendChild(dayElement);
+                });
+            }
+            
+            // Study plan option click events
+            document.querySelectorAll('.planner-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.planner-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    const days = parseInt(this.getAttribute('data-days'));
+                    displayStudyPlan(days);
+                });
+            });
+            
+            // Initialize with sample data for demonstration
+            displayChapterAnalysis();
+            displayExpectedQuestions();
+            initializeCharts();
+            displayStudyPlan(7);
         });
     </script>
 </body>
